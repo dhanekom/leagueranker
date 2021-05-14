@@ -6,10 +6,6 @@ Takes league game scores as a text input and outputs teams ordered by their rank
 ```console
 $ cat input.txt | ./leagueranker
 ```
-or
-```console
-$ ./leagueranker "Lions 3, Sharks 2"
-```
 ### Use an input file
 ```console
 $ ./leagueranker -file input.txt
