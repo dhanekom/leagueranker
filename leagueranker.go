@@ -24,14 +24,13 @@ const (
 	pointsLose = 0
 )
 
-// GetRankedTeams take league game scores as a string and outputs teams ordered by their rank as formatted text
-func GetRankedTeams(input string) (string, error) {
-	var result string
-	var coolTeams []Team
+// GetRankedTeams take league game scores as a string and outputs a slice of teams ordered by their rank
+func GetRankedTeams(input string) ([]Team, error) {
+	var teams []Team
 	var teamOne, teamTwo *Team
 
 	if strings.Trim(input, " ") == "" {
-		return "", errors.New("no input provided")
+		return nil, errors.New("no input provided")
 	}
 
 	getScoreAndAddTeam := func(gameScore string) (name string, score int, err error) {
@@ -40,8 +39,8 @@ func GetRankedTeams(input string) (string, error) {
 			return "", 0, err
 		}
 
-		if i := findTeam(name, coolTeams); i == -1 {
-			coolTeams = append(coolTeams, Team{name: name})
+		if i := findTeam(name, teams); i == -1 {
+			teams = append(teams, Team{name: name})
 		}
 
 		return
@@ -51,29 +50,29 @@ func GetRankedTeams(input string) (string, error) {
 	for _, line := range lines {
 		gameScores := strings.Split(line, ",")
 		if len(gameScores) != 2 {
-			return "", fmt.Errorf("team scores required = 2, found %d", len(gameScores))
+			return nil, fmt.Errorf("team scores required = 2, found %d", len(gameScores))
 		}
 
 		teamOneName, teamOneScore, err := getScoreAndAddTeam(gameScores[0])
 		if err != nil {
-			return "", err
+			return nil, err
 		}
 
 		teamTwoName, teamTwoScore, err := getScoreAndAddTeam(gameScores[1])
 		if err != nil {
-			return "", err
+			return nil, err
 		}
 
 		var index int
-		if index = findTeam(teamOneName, coolTeams); index == -1 {
-			return "", fmt.Errorf("team %s not found", teamOneName)
+		if index = findTeam(teamOneName, teams); index == -1 {
+			return nil, fmt.Errorf("team %s not found", teamOneName)
 		}
-		teamOne = &coolTeams[index]
+		teamOne = &teams[index]
 
-		if index = findTeam(teamTwoName, coolTeams); index == -1 {
-			return "", fmt.Errorf("team %s not found", teamTwoName)
+		if index = findTeam(teamTwoName, teams); index == -1 {
+			return nil, fmt.Errorf("team %s not found", teamTwoName)
 		}
-		teamTwo = &coolTeams[index]
+		teamTwo = &teams[index]
 
 		if teamOneScore == teamTwoScore {
 			teamOne.points += pointsDraw
@@ -88,19 +87,19 @@ func GetRankedTeams(input string) (string, error) {
 	}
 
 	// Sort teams
-	sort.Slice(coolTeams, func(i, j int) bool {
-		if coolTeams[i].points == coolTeams[j].points {
-			return coolTeams[i].name < coolTeams[j].name
+	sort.Slice(teams, func(i, j int) bool {
+		if teams[i].points == teams[j].points {
+			return teams[i].name < teams[j].name
 		} else {
-			return coolTeams[i].points > coolTeams[j].points
+			return teams[i].points > teams[j].points
 		}
 	})
 
 	// Rank teams
 	var lastPoints int
 	tmpRank := 1
-	for i := range coolTeams {
-		team := &coolTeams[i]
+	for i := range teams {
+		team := &teams[i]
 		if i == 0 {
 			lastPoints = team.points
 			team.rank = tmpRank
@@ -115,14 +114,7 @@ func GetRankedTeams(input string) (string, error) {
 		lastPoints = team.points
 	}
 
-	// Format output
-	for i, team := range coolTeams {
-		if i > 0 {
-			result += "\n"
-		}
-		result += fmt.Sprintf("%d. %s, %d pts", team.rank, team.name, team.points)
-	}
-	return result, nil
+	return teams, nil
 }
 
 func getTeamScore(teamScoreStr string) (string, int, error) {
@@ -156,6 +148,18 @@ func findTeam(name string, teams []Team) int {
 	return -1
 }
 
+func GetFormattedRankedTeams(teams []Team) string {
+	var result string
+	for i, team := range teams {
+		if i > 0 {
+			result += "\n"
+		}
+		result += fmt.Sprintf("%d. %s, %d pts", team.rank, team.name, team.points)
+	}
+
+	return result
+}
+
 func main() {
 	filePathPtr := flag.String("file", "", "Path to file containing league game results")
 	flag.Parse()
@@ -179,10 +183,12 @@ func main() {
 
 	input = strings.Trim(input, "\n")
 
-	output, err := GetRankedTeams(input)
+	teams, err := GetRankedTeams(input)
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	output := GetFormattedRankedTeams(teams)
 
 	fmt.Println(output)
 }

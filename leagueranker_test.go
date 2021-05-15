@@ -63,24 +63,26 @@ Lions 4, Grouches 0`,
 }
 
 func TestGetRankedTeams(t *testing.T) {
+	displayResult := func(description, got, want string) {
+		t.Fatalf(`FAIL: %s
+got:
+%s
+want:
+%s`, description, got, want)
+	}
+
 	for _, tc := range addCases {
-		got, err := GetRankedTeams(tc.in)
+		teams, err := GetRankedTeams(tc.in)
 
 		if err != nil {
 			if err.Error() != tc.want {
-				t.Fatalf(`FAIL: %s
-got:
-%s
-want:
-%s`, tc.description, err.Error(), tc.want)
+				displayResult(tc.description, err.Error(), tc.want)
 			}
 		} else {
+			got := GetFormattedRankedTeams(teams)
+
 			if got != tc.want {
-				t.Fatalf(`FAIL: %s
-got:
-%s
-want:
-%s`, tc.description, got, tc.want)
+				displayResult(tc.description, got, tc.want)
 			}
 		}
 	}
