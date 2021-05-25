@@ -35,7 +35,7 @@ $ go build
 ```
 ## Usage examples
 ### Pipe data into the application
-from the my-project/cmd/leagranker directory
+from the my-project/leagueranker/cmd/leagranker directory
 ```console
 $ cat input.txt | ./leagueranker
 ```
