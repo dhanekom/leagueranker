@@ -1,6 +1,9 @@
-package main
+package leagueranker
 
 import (
+	"bufio"
+	"log"
+	"strings"
 	"testing"
 )
 
@@ -10,11 +13,6 @@ var addCases = []struct {
 	want        string
 }{
 	{
-		"No input",
-		"",
-		"no input provided",
-	},
-	{
 		"No space between team and score",
 		`Lions3, Snakes 3`,
 		`invalid line format`,
@@ -22,12 +20,12 @@ var addCases = []struct {
 	{
 		"No commas between team scores",
 		`Lions 3 Snakes 1`,
-		"team scores required = 2, found 1",
+		"invalid line format",
 	},
 	{
 		"Too many teams",
 		`Lions 3, Snakes 1, Sharks 5`,
-		"team scores required = 2, found 3",
+		"invalid line format",
 	},
 	{
 		"Successful sorting",
@@ -56,13 +54,13 @@ Tarantulas 3, Snakes 1
 Lions 4, Grouches 0`,
 		`1. Tarantulas, 6 pts
 2. Lions, 5 pts
-3. FC Awesome, 1 pts
-3. Snakes, 1 pts
+3. FC Awesome, 1 pt
+3. Snakes, 1 pt
 5. Grouches, 0 pts`,
 	},
 }
 
-func TestGetRankedTeams(t *testing.T) {
+func TestRankedTeams(t *testing.T) {
 	displayResult := func(description, got, want string) {
 		t.Fatalf(`FAIL: %s
 got:
@@ -72,18 +70,52 @@ want:
 	}
 
 	for _, tc := range addCases {
-		teams, err := GetRankedTeams(tc.in)
-
+		r := bufio.NewReader(strings.NewReader(tc.in))
+		ranker, err := NewRanker()
 		if err != nil {
-			if err.Error() != tc.want {
-				displayResult(tc.description, err.Error(), tc.want)
-			}
-		} else {
-			got := GetFormattedRankedTeams(teams)
-
-			if got != tc.want {
-				displayResult(tc.description, got, tc.want)
+			log.Fatalln(err)
+		}
+		scanner := bufio.NewScanner(r)
+		hasErrors := false
+		for scanner.Scan() {
+			err = ranker.Parse(scanner.Text())
+			if err != nil {
+				hasErrors = true
+				if err.Error() != tc.want {
+					displayResult(tc.description, err.Error(), tc.want)
+					continue
+				}
 			}
 		}
+
+		if hasErrors {
+			continue
+		}
+
+		teams := ranker.RankedTeams()
+		got := GetOutput(teams)
+
+		if got != tc.want {
+			displayResult(tc.description, got, tc.want)
+		}
+	}
+}
+
+func BenchmarkParse(b *testing.B) {
+	ranker, _ := NewRanker()
+	for i := 0; i < b.N; i++ {
+		ranker.Parse("Lions 3, Snakes 3")
+	}
+}
+
+func BenchmarkRankedTeams(b *testing.B) {
+	ranker, _ := NewRanker()
+	for i := 0; i < b.N; i++ {
+		ranker.Parse("Lions 3, Snakes 3")
+		ranker.Parse("Tarantulas 1, FC Awesome 0")
+		ranker.Parse("Lions 1, FC Awesome 1")
+		ranker.Parse("Tarantulas 3, Snakes 1")
+		ranker.Parse("Lions 4, Grouches 0")
+		ranker.RankedTeams()
 	}
 }
