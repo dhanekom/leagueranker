@@ -5,6 +5,9 @@
 *.so
 *.dylib
 
+cmd/cmd
+leagueranker
+
 # Test binary, built with `go test -c`
 *.test
 
