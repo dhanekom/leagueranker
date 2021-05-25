@@ -30,7 +30,7 @@ $ git cone https://github.com/dhanekom/leagueranker.git
 Step 2: Build the application
 For the root directory op your project (e.g. the my-project directory)
 ```console
-$ cd cmd/leagranker
+$ cd leagueranker/cmd/leagranker
 $ go build
 ```
 ## Usage examples
