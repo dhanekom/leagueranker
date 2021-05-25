@@ -110,12 +110,12 @@ func BenchmarkParse(b *testing.B) {
 
 func BenchmarkRankedTeams(b *testing.B) {
 	ranker, _ := NewRanker()
+	ranker.Parse("Lions 3, Snakes 3")
+	ranker.Parse("Tarantulas 1, FC Awesome 0")
+	ranker.Parse("Lions 1, FC Awesome 1")
+	ranker.Parse("Tarantulas 3, Snakes 1")
+	ranker.Parse("Lions 4, Grouches 0")
 	for i := 0; i < b.N; i++ {
-		ranker.Parse("Lions 3, Snakes 3")
-		ranker.Parse("Tarantulas 1, FC Awesome 0")
-		ranker.Parse("Lions 1, FC Awesome 1")
-		ranker.Parse("Tarantulas 3, Snakes 1")
-		ranker.Parse("Lions 4, Grouches 0")
 		ranker.RankedTeams()
 	}
 }
