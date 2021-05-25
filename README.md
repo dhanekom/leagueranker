@@ -25,13 +25,13 @@ Step 1: Clone the repo
 ```console
 Create a directory for your project (e.g. my-project)
 cd into the directory (e.g. cd my-project)
-git cone https://github.com/dhanekom/leagueranker.git
+$ git cone https://github.com/dhanekom/leagueranker.git
 ```
 Step 2: Build the application
 For the root directory op your project (e.g. the my-project directory)
 ```console
-cd cmd/leagranker
-go build
+$ cd cmd/leagranker
+$ go build
 ```
 ## Usage examples
 ### Pipe data into the application
